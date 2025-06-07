@@ -18,11 +18,12 @@
             height: 100vh;
             margin: 0;
             padding: 20px;
-            background: radial-gradient(circle at 50% 50%, rgba(10, 20, 10, 0.9) 0%, #000 120%);
+            background-color: #000;
             color: #33ff33;
             overflow: hidden;
             position: relative;
             touch-action: manipulation;
+            transition: background-color 0.2s;
         }
         body::after {
             content: '';
@@ -36,49 +37,8 @@
                         transparent 70%);
             pointer-events: none;
             z-index: 0;
-            will-change: transform;
+            opacity: 0.5;
         }
-        .noise {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 1;
-        }
-        .static-grid {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(51, 255, 51, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(51, 255, 51, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none;
-            z-index: 0;
-        }
-        .crt-effect {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 2;
-            animation: scanline 8s linear infinite;
-        }
-        @keyframes scanline {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 100%; }
-        }
-        
-        /* (Keep all your original styles for message-container, buttons, progress bars, etc. below) */
         #message-container {
             height: 24px;
             display: flex;
@@ -286,6 +246,70 @@
             80% { transform: translateX(3px); }
             100% { transform: translateX(0); }
         }
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            opacity: 0.4;
+            z-index: 1;
+        }
+        .crt-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 2;
+            animation: scanline 8s linear infinite;
+        }
+        .bg-glitch {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+        }
+        .bg-glitch-line {
+            position: absolute;
+            height: 1px;
+            width: 100%;
+            background: rgba(51, 255, 51, 0.1);
+            animation: bg-glitch-line 3s infinite;
+        }
+        .bg-glitch-pixel {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: rgba(51, 255, 51, 0.3);
+            animation: bg-glitch-pixel 4s infinite;
+        }
+        @keyframes bg-glitch-line {
+            0%, 100% { opacity: 0; height: 1px; }
+            5% { opacity: 0.3; height: 1px; }
+            10% { opacity: 0; height: 2px; }
+        }
+        @keyframes bg-glitch-pixel {
+            0%, 100% { opacity: 0; }
+            1% { opacity: 0.8; }
+            2% { opacity: 0; }
+        }
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
         @keyframes textGlow {
             0% { text-shadow: 0 0 5px #33ff33; }
             50% { text-shadow: 0 0 20px #33ff33; }
@@ -409,7 +433,6 @@
 </head>
 <body>
     <div class="noise"></div>
-    <div class="static-grid"></div>
     <div class="crt-effect"></div>
     <div id="message-container">HEYY MEL1NA...</div>
     <button id="countdownButton" aria-live="polite" aria-label="Activate BAC countdown timer">PRESS HERE</button>
@@ -441,24 +464,6 @@
     <div class="glitch" id="glitch"></div>
 
     <script>
-        // Performance check for low-end devices
-        const isLowEndDevice = () => {
-            try {
-                return navigator.hardwareConcurrency < 4 || 
-                       navigator.deviceMemory < 2 ||
-                       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            } catch {
-                return false;
-            }
-        };
-
-        // Simplify background if low-end device
-        if (isLowEndDevice()) {
-            document.querySelector('.static-grid')?.remove();
-            document.body.style.background = "#000";
-            document.body.style.backgroundImage = "none";
-        }
-
         // Cache DOM elements
         const elements = {
             message: document.getElementById('message-container'),
@@ -469,6 +474,8 @@
             progressNumber: document.getElementById('progressNumber'),
             motivation: document.getElementById('motivation'),
             glitch: document.getElementById('glitch'),
+            noise: document.querySelector('.noise'),
+            crt: document.querySelector('.crt-effect'),
             terminal: document.getElementById('terminal'),
             countdown: document.getElementById('countdown'),
             countdownContent: document.querySelector('.countdown-content')
@@ -852,6 +859,48 @@
                 }
             }, 50);
         }
+        
+        // Background glitch effects
+        function createBackgroundGlitches() {
+            const glitchContainer = document.createElement('div');
+            glitchContainer.className = 'bg-glitch';
+            
+            // Create horizontal glitch lines
+            for (let i = 0; i < 15; i++) {
+                const line = document.createElement('div');
+                line.className = 'bg-glitch-line';
+                line.style.top = Math.random() * 100 + '%';
+                line.style.animationDelay = Math.random() * 5 + 's';
+                line.style.animationDuration = 3 + Math.random() * 4 + 's';
+                glitchContainer.appendChild(line);
+            }
+            
+            // Create random pixel glitches
+            for (let i = 0; i < 30; i++) {
+                const pixel = document.createElement('div');
+                pixel.className = 'bg-glitch-pixel';
+                pixel.style.left = Math.random() * 100 + '%';
+                pixel.style.top = Math.random() * 100 + '%';
+                pixel.style.animationDelay = Math.random() * 10 + 's';
+                pixel.style.animationDuration = 2 + Math.random() * 3 + 's';
+                glitchContainer.appendChild(pixel);
+            }
+            
+            document.body.appendChild(glitchContainer);
+            
+            // Random brightness fluctuation
+            setInterval(() => {
+                if (Math.random() < 0.3) {
+                    document.body.style.backgroundColor = `rgba(${Math.floor(Math.random() * 10)}, ${Math.floor(Math.random() * 10)}, ${Math.floor(Math.random() * 10)}, 1)`;
+                    setTimeout(() => {
+                        document.body.style.backgroundColor = '#000';
+                    }, 50);
+                }
+            }, 5000);
+        }
+        
+        // Initialize background glitches
+        createBackgroundGlitches();
         
         // Save last view time
         function saveViewTime() {
