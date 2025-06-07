@@ -272,40 +272,62 @@
             z-index: 2;
             animation: scanline 8s linear infinite;
         }
-        .bg-glitch {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0;
-        }
-        .bg-glitch-line {
-            position: absolute;
-            height: 1px;
-            width: 100%;
-            background: rgba(51, 255, 51, 0.1);
-            animation: bg-glitch-line 3s infinite;
-        }
-        .bg-glitch-pixel {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            background: rgba(51, 255, 51, 0.3);
-            animation: bg-glitch-pixel 4s infinite;
-        }
-        @keyframes bg-glitch-line {
-            0%, 100% { opacity: 0; height: 1px; }
-            5% { opacity: 0.3; height: 1px; }
-            10% { opacity: 0; height: 2px; }
-        }
-        @keyframes bg-glitch-pixel {
-            0%, 100% { opacity: 0; }
-            1% { opacity: 0.8; }
-            2% { opacity: 0; }
-        }
+        /* Enhanced Background Effects */
+.cyber-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        linear-gradient(rgba(0, 255, 0, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 0, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+    animation: gridScroll 60s linear infinite;
+}
+
+@keyframes gridScroll {
+    0% { background-position: 0 0; }
+    100% { background-position: 80px 80px; }
+}
+
+.digital-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.pulse-dots {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.pulse-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: #33ff33;
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: pulse 4s infinite ease-in-out;
+    opacity: 0;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 0.4; }
+}
         @keyframes scanline {
             0% { background-position: 0 0; }
             100% { background-position: 0 100%; }
@@ -911,64 +933,73 @@
         
         // Background glitch effects
         function createBackgroundGlitches() {
-    // Create moving grid
+    // Create cyber grid
     const grid = document.createElement('div');
-    grid.className = 'grid-lines';
+    grid.className = 'cyber-grid';
     document.body.appendChild(grid);
 
-    // Create particles
-    const particlesContainer = document.createElement('div');
-    particlesContainer.className = 'particles';
-    document.body.appendChild(particlesContainer);
+    // Create digital rain effect
+    const rain = document.createElement('canvas');
+    rain.className = 'digital-rain';
+    document.body.appendChild(rain);
+    
+    // Create pulse dots container
+    const pulseContainer = document.createElement('div');
+    pulseContainer.className = 'pulse-dots';
+    document.body.appendChild(pulseContainer);
 
-    // Generate particles
-    for (let i = 0; i < 100; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.left = Math.random() * 100 + '%';
-        particle.style.top = Math.random() * 100 + '%';
-        particle.style.opacity = Math.random() * 0.7 + 0.3;
-        particle.style.animationDuration = (Math.random() * 20 + 10) + 's';
-        particle.style.animationDelay = (Math.random() * 5) + 's';
-        particlesContainer.appendChild(particle);
-    }
-
-    // Random glitch effects
-    setInterval(() => {
-    if (Math.random() < 0.3) {
-        const terminalRect = elements.terminal.getBoundingClientRect();
-        let x, y;
+    // Initialize digital rain
+    if (rain.getContext) {
+        const ctx = rain.getContext('2d');
+        rain.width = window.innerWidth;
+        rain.height = window.innerHeight;
         
-        // Ensure glitches don't spawn inside terminal
-        do {
-            x = Math.random() * 80 + 10;
-            y = Math.random() * 80 + 10;
-        } while (
-            x > (terminalRect.left/window.innerWidth)*100 - 5 && 
-            x < ((terminalRect.right)/window.innerWidth)*100 + 5 &&
-            y > (terminalRect.top/window.innerHeight)*100 - 5 && 
-            y < ((terminalRect.bottom)/window.innerHeight)*100 + 5
-        );
-
-        // Rest of the glitch creation code...
-    }
+        const columns = Math.floor(rain.width / 20);
+        const drops = Array(columns).fill(1);
         
-        if (Math.random() < 0.3) {
-            const glitch = document.createElement('div');
-            glitch.className = 'bg-glitch';
-            glitch.style.left = Math.random() * 80 + 10 + '%';
-            glitch.style.top = Math.random() * 80 + 10 + '%';
-            glitch.style.width = Math.random() * 200 + 50 + 'px';
-            glitch.style.height = Math.random() * 200 + 50 + 'px';
-            glitch.style.opacity = Math.random() * 0.3 + 0.1;
-            glitch.style.animation = 'bg-glitch-pixel ' + (Math.random() * 0.5 + 0.3) + 's';
-            document.body.appendChild(glitch);
+        function drawRain() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, rain.width, rain.height);
             
+            ctx.fillStyle = '#33ff33';
+            ctx.font = '15px monospace';
+            
+            drops.forEach((drop, i) => {
+                const text = String.fromCharCode(Math.random() * 128);
+                ctx.fillText(text, i * 20, drop * 20);
+                
+                if (drop * 20 > rain.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            });
+            
+            requestAnimationFrame(drawRain);
+        }
+        
+        drawRain();
+    }
+
+    // Create pulsing dots
+    for (let i = 0; i < 30; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'pulse-dot';
+        dot.style.left = Math.random() * 100 + '%';
+        dot.style.top = Math.random() * 100 + '%';
+        dot.style.animationDelay = Math.random() * 5 + 's';
+        dot.style.animationDuration = 3 + Math.random() * 4 + 's';
+        pulseContainer.appendChild(dot);
+    }
+
+    // Occasional screen flash
+    setInterval(() => {
+        if (Math.random() < 0.1) {
+            document.body.style.boxShadow = 'inset 0 0 100px rgba(51, 255, 51, 0.3)';
             setTimeout(() => {
-                glitch.remove();
+                document.body.style.boxShadow = 'none';
             }, 300);
         }
-    }, 1000);
+    }, 5000);
 }
         
         // Initialize background glitches
@@ -981,7 +1012,17 @@
         
         // Add beforeunload event to save view time
         window.addEventListener('beforeunload', saveViewTime);
+        window.addEventListener('resize', () => {
+    const rain = document.querySelector('.digital-rain');
+    if (rain) {
+        rain.width = window.innerWidth;
+        rain.height = window.innerHeight;
+    }
+});
     </script>
+
+
+
 
 
 </body>
