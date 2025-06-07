@@ -18,58 +18,11 @@
             height: 100vh;
             margin: 0;
             padding: 20px;
-            background: 
-                radial-gradient(circle at center, 
-                    rgba(10, 30, 10, 0.8) 0%, 
-                    rgba(0, 5, 0, 0.9) 70%),
-                linear-gradient(
-                    to bottom,
-                    rgba(20, 50, 20, 0.2) 0%,
-                    rgba(0, 10, 0, 0.7) 100%
-                );
+            background: radial-gradient(circle at 50% 50%, rgba(10, 20, 10, 0.9) 0%, #000 120%);
             color: #33ff33;
             overflow: hidden;
             position: relative;
             touch-action: manipulation;
-            animation: bgPulse 15s infinite alternate;
-        }
-        @keyframes bgPulse {
-            0% { background-color: rgba(0, 8, 0, 0.95); }
-            100% { background-color: rgba(0, 15, 0, 0.9); }
-        }
-        .bg-circuit {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(circle at 30% 50%, rgba(30, 255, 30, 0.03) 0%, transparent 20%),
-                radial-gradient(circle at 70% 70%, rgba(30, 255, 30, 0.03) 0%, transparent 20%),
-                radial-gradient(circle at 20% 20%, rgba(30, 255, 30, 0.03) 0%, transparent 20%);
-            z-index: 0;
-            animation: circuitPulse 20s infinite alternate;
-        }
-        @keyframes circuitPulse {
-            0% { opacity: 0.3; }
-            50% { opacity: 0.6; }
-            100% { opacity: 0.3; }
-        }
-        .bg-dots {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(circle, rgba(30, 255, 30, 0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
-            z-index: 0;
-            animation: dotsMove 300s linear infinite;
-        }
-        @keyframes dotsMove {
-            from { background-position: 0 0; }
-            to { background-position: 100px 100px; }
         }
         body::after {
             content: '';
@@ -78,26 +31,54 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                radial-gradient(circle at var(--x) var(--y), 
-                    rgba(51,255,51,0.15) 0%, 
-                    transparent 70%),
-                repeating-linear-gradient(
-                    0deg,
-                    transparent,
-                    transparent 1px,
-                    rgba(20, 80, 20, 0.1) 2px,
-                    rgba(20, 80, 20, 0.1) 3px
-                );
+            background: radial-gradient(circle at var(--x) var(--y), 
+                        rgba(51,255,51,0.1) 0%, 
+                        transparent 70%);
             pointer-events: none;
             z-index: 0;
-            opacity: 0.7;
-            animation: gridMove 120s linear infinite;
+            will-change: transform;
         }
-        @keyframes gridMove {
-            from { background-position: 0 0; }
-            to { background-position: 0 100px; }
+        .noise {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noiseFilter)' opacity='0.1'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
         }
+        .static-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(51, 255, 51, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(51, 255, 51, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .crt-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 2;
+            animation: scanline 8s linear infinite;
+        }
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+        
+        /* (Keep all your original styles for message-container, buttons, progress bars, etc. below) */
         #message-container {
             height: 24px;
             display: flex;
@@ -305,36 +286,6 @@
             80% { transform: translateX(3px); }
             100% { transform: translateX(0); }
         }
-        .noise {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-            opacity: 0.4;
-            z-index: 1;
-        }
-        .crt-effect {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-            background-size: 100% 4px;
-            pointer-events: none;
-            z-index: 2;
-            animation: scanline 8s linear infinite;
-        }
-        @keyframes scanline {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 100%; }
-        }
         @keyframes textGlow {
             0% { text-shadow: 0 0 5px #33ff33; }
             50% { text-shadow: 0 0 20px #33ff33; }
@@ -457,9 +408,8 @@
     </style>
 </head>
 <body>
-    <div class="bg-circuit"></div>
-    <div class="bg-dots"></div>
     <div class="noise"></div>
+    <div class="static-grid"></div>
     <div class="crt-effect"></div>
     <div id="message-container">HEYY MEL1NA...</div>
     <button id="countdownButton" aria-live="polite" aria-label="Activate BAC countdown timer">PRESS HERE</button>
@@ -491,6 +441,24 @@
     <div class="glitch" id="glitch"></div>
 
     <script>
+        // Performance check for low-end devices
+        const isLowEndDevice = () => {
+            try {
+                return navigator.hardwareConcurrency < 4 || 
+                       navigator.deviceMemory < 2 ||
+                       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            } catch {
+                return false;
+            }
+        };
+
+        // Simplify background if low-end device
+        if (isLowEndDevice()) {
+            document.querySelector('.static-grid')?.remove();
+            document.body.style.background = "#000";
+            document.body.style.backgroundImage = "none";
+        }
+
         // Cache DOM elements
         const elements = {
             message: document.getElementById('message-container'),
@@ -501,8 +469,6 @@
             progressNumber: document.getElementById('progressNumber'),
             motivation: document.getElementById('motivation'),
             glitch: document.getElementById('glitch'),
-            noise: document.querySelector('.noise'),
-            crt: document.querySelector('.crt-effect'),
             terminal: document.getElementById('terminal'),
             countdown: document.getElementById('countdown'),
             countdownContent: document.querySelector('.countdown-content')
@@ -520,13 +486,9 @@
         let lastQuoteIndex = -1;
         
         // Track mouse for dynamic background
-        let mouseMoveTimeout;
         document.addEventListener('mousemove', (e) => {
-            clearTimeout(mouseMoveTimeout);
-            mouseMoveTimeout = setTimeout(() => {
-                document.body.style.setProperty('--x', `${e.clientX}px`);
-                document.body.style.setProperty('--y', `${e.clientY}px`);
-            }, 50);
+            document.body.style.setProperty('--x', `${e.clientX}px`);
+            document.body.style.setProperty('--y', `${e.clientY}px`);
         });
         
         // Initial sequence
