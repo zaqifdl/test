@@ -393,46 +393,6 @@
             .terminal {
                 padding: 15px;
             }
-
-
-            
-
-    .bg-glitch {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 0;
-        opacity: 0;
-    }
-    .bg-glitch-line {
-        position: absolute;
-        height: 1px;
-        width: 100%;
-        background: rgba(51, 255, 51, 0.1);
-        animation: bg-glitch-line 3s infinite;
-    }
-    .bg-glitch-pixel {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        background: rgba(51, 255, 51, 0.3);
-        animation: bg-glitch-pixel 4s infinite;
-    }
-    @keyframes bg-glitch-line {
-        0%, 100% { opacity: 0; height: 1px; }
-        5% { opacity: 0.3; height: 1px; }
-        10% { opacity: 0; height: 2px; }
-    }
-    @keyframes bg-glitch-pixel {
-        0%, 100% { opacity: 0; }
-        1% { opacity: 0.8; }
-        2% { opacity: 0; }
-    }
-
-            
     </style>
 </head>
 <body>
@@ -871,51 +831,6 @@
         
         // Add beforeunload event to save view time
         window.addEventListener('beforeunload', saveViewTime);
-
-
-
-        <script>
-    // Add this after your existing JavaScript
-    function createBackgroundGlitches() {
-        const glitchContainer = document.createElement('div');
-        glitchContainer.className = 'bg-glitch';
-        
-        // Create horizontal glitch lines
-        for (let i = 0; i < 15; i++) {
-            const line = document.createElement('div');
-            line.className = 'bg-glitch-line';
-            line.style.top = Math.random() * 100 + '%';
-            line.style.animationDelay = Math.random() * 5 + 's';
-            line.style.animationDuration = 3 + Math.random() * 4 + 's';
-            glitchContainer.appendChild(line);
-        }
-        
-        // Create random pixel glitches
-        for (let i = 0; i < 30; i++) {
-            const pixel = document.createElement('div');
-            pixel.className = 'bg-glitch-pixel';
-            pixel.style.left = Math.random() * 100 + '%';
-            pixel.style.top = Math.random() * 100 + '%';
-            pixel.style.animationDelay = Math.random() * 10 + 's';
-            pixel.style.animationDuration = 2 + Math.random() * 3 + 's';
-            glitchContainer.appendChild(pixel);
-        }
-        
-        document.body.appendChild(glitchContainer);
-        
-        // Random brightness fluctuation
-        setInterval(() => {
-            if (Math.random() < 0.3) {
-                document.body.style.backgroundColor = `rgba(${Math.floor(Math.random() * 10)}, ${Math.floor(Math.random() * 10)}, ${Math.floor(Math.random() * 10)}, 1)`;
-                setTimeout(() => {
-                    document.body.style.backgroundColor = '#000';
-                }, 50);
-            }
-        }, 5000);
-    }
-    
-    // Call this function at the end of your script
-    createBackgroundGlitches();
     </script>
 </body>
 </html>
