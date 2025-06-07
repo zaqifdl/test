@@ -126,11 +126,15 @@
         .motivation {
             color: #33ff33;
             font-style: italic;
-            font-size: 14px;
+            font-size: 16px;
             margin-top: 20px;
-            opacity: 0;
-            transition: opacity 0.5s;
-            display: none; /* Initially hidden */
+            opacity: 1;
+            transition: opacity 0.3s;
+            display: none;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px #33ff33;
+            position: relative;
         }
         .glitch {
             position: fixed;
@@ -220,13 +224,18 @@
             0% { background-position: 0 0; }
             100% { background-position: 0 100%; }
         }
+        @keyframes textGlow {
+            0% { text-shadow: 0 0 5px #33ff33; }
+            50% { text-shadow: 0 0 20px #33ff33; }
+            100% { text-shadow: 0 0 5px #33ff33; }
+        }
     </style>
 </head>
 <body>
     <div class="noise"></div>
     <div class="crt-effect"></div>
-    <div id="message-container">Heyyy</div>
-    <button id="countdownButton">INITIALIZE COUNTDOWN</button>
+    <div id="message-container">INITIALIZING SYSTEM...</div>
+    <button id="countdownButton">ACTIVATE COUNTDOWN</button>
     <div class="progress-container" id="progressContainer">
         <div class="progress-bar">
             <div class="progress-fill" id="progressFill"></div>
@@ -252,18 +261,49 @@
         const motivationElement = document.getElementById('motivation');
         const glitchElement = document.getElementById('glitch');
         
-        // Motivational quotes
+        // Personalized quotes for Mel1na
         const quotes = [
-            "You've got this! BAC is yours!",
-            "Your hard work will pay off!",
-            "Believe in yourself!",
-            "Every minute brings you closer!",
-            "Stay focused - you can do this!",
-            "You're stronger than you think!",
-            "One step at a time to success!"
+            "MEL1NA: YOU'RE CRUSHING IT!",
+            "SYSTEM ALERT: MEL1NA IS BRILLIANT",
+            "BAC 2025: MEL1NA'S TIME TO SHINE",
+            "WARNING: MEL1NA'S POTENTIAL OVERFLOW",
+            "ANALYSIS: MEL1NA = SUCCESS",
+            "MEL1NA: SYSTEM OVERRIDE: YOU GOT THIS",
+            "BAC PROTOCOL: MEL1NA WILL EXCEL",
+            "MEL1NA: ERROR 404 - DOUBT NOT FOUND",
+            "MEL1NA: HARD WORK DETECTED",
+            "PREDICTION: MEL1NA WILL ACE THIS",
+            "MEL1NA: CONFIDENCE LEVELS RISING",
+            "MEL1NA: FINAL_EXAM.EXE LOADED"
         ];
         
-        // Initial sequence - show heyyy then replace with button
+        // Audio samples for better sound effects
+        const soundEffects = {
+            glitch: [
+                {freq: 60, type: 'square', duration: 0.1, vol: 0.2},
+                {freq: 120, type: 'sawtooth', duration: 0.05, vol: 0.15},
+                {freq: 240, type: 'square', duration: 0.08, vol: 0.1}
+            ],
+            positive: [
+                {freq: 392, type: 'sine', duration: 0.3, vol: 0.15}, // G4
+                {freq: 523.25, type: 'sine', duration: 0.2, vol: 0.1} // C5
+            ],
+            complete: [
+                {freq: 261.63, type: 'sine', duration: 0.2, vol: 0.15}, // C4
+                {freq: 329.63, type: 'sine', duration: 0.2, vol: 0.15}, // E4
+                {freq: 392, type: 'sine', duration: 0.3, vol: 0.2} // G4
+            ]
+        };
+        
+        // Initialize audio context
+        let audioContext;
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        } catch (e) {
+            console.log("Web Audio API not supported");
+        }
+        
+        // Initial sequence
         setTimeout(() => {
             messageContainer.style.opacity = '0';
             setTimeout(() => {
@@ -273,9 +313,12 @@
                     button.style.opacity = '1';
                 }, 10);
             }, 300);
-        }, 800);
+        }, 1500);
         
         button.addEventListener('click', function() {
+            // Play activation sound
+            playSoundSequence(soundEffects.glitch);
+            
             button.style.opacity = '0';
             setTimeout(() => {
                 button.style.display = 'none';
@@ -284,15 +327,16 @@
                     progressContainer.style.opacity = '1';
                 }, 10);
                 
-                // Faster but realistic loading progress
+                // Loading progress with enhanced effects
                 let progress = 0;
                 const baseSpeed = 1.5;
                 const downloadInterval = setInterval(() => {
                     let increment = baseSpeed + Math.random() * 3;
                     
-                    // Random speed boosts (10% chance)
+                    // Random speed boosts
                     if(Math.random() < 0.1) {
                         increment += 5 + Math.random() * 10;
+                        playRandomSound(soundEffects.glitch);
                     }
                     
                     // Slow down near 100%
@@ -306,6 +350,11 @@
                     progressFill.style.width = progress + '%';
                     progressText.textContent = Math.floor(progress) + '%';
                     progressNumber.textContent = Math.floor(progress);
+                    
+                    // Play positive sound at milestones
+                    if (progress % 25 === 0) {
+                        playRandomSound(soundEffects.positive);
+                    }
                     
                     // Random small jumps in progress
                     if(Math.random() < 0.3 && progress < 95) {
@@ -360,6 +409,9 @@
                                 glitchElement.appendChild(text);
                             }
                             
+                            // Play completion sound
+                            playSoundSequence(soundEffects.complete);
+                            
                             // Hide glitch after effect
                             setTimeout(() => {
                                 glitchElement.style.display = 'none';
@@ -403,7 +455,6 @@
                 if (iterations >= maxIterations) {
                     clearInterval(decryptInterval);
                     countdownContent.textContent = originalText;
-                    // Only show motivation after countdown is fully decrypted
                     showCountdown();
                     showRandomQuote();
                 }
@@ -418,8 +469,9 @@
                 const difference = targetDate - currentDate;
                 
                 if (difference <= 0) {
-                    countdownContent.textContent = "BAC TIME HAS COME!\n\nYou're ready!\nGo make yourself proud!";
-                    motivationElement.textContent = "This is your moment! Give it everything!";
+                    countdownContent.textContent = "BAC TIME HAS COME!\n\nYou're ready Mel1na!\nGo make yourself proud!";
+                    motivationElement.textContent = "MEL1NA: FINAL_EXAM_PROTOCOL ENGAGED";
+                    motivationElement.style.animation = "textGlow 2s infinite";
                     return;
                 }
                 
@@ -436,6 +488,12 @@
                     `Seconds: ${seconds.toString().padStart(2, '0')}`;
                 
                 countdownContent.textContent = countdownText;
+                
+                // Add pulsing effect when <24h remains
+                if(days === 0 && hours < 24) {
+                    countdownElement.style.animation = 'textGlow 1s infinite';
+                    playRandomSound(soundEffects.positive);
+                }
             }
             
             updateCountdown();
@@ -443,19 +501,110 @@
         }
         
         function showRandomQuote() {
-            motivationElement.style.display = 'block'; // Make visible
+            motivationElement.style.display = 'block';
             const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-            motivationElement.textContent = randomQuote;
-            motivationElement.style.opacity = '1';
             
-            // Change quote every 5 seconds
-            setInterval(() => {
-                motivationElement.style.opacity = 0;
+            // Initial glitch-in effect
+            glitchTextEffect(motivationElement, randomQuote, () => {
+                // After appearing, start the glitch loop
+                startGlitchLoop();
+            });
+            
+            function startGlitchLoop() {
+                // Random duration before next glitch (3-7 seconds)
+                const nextGlitch = 3000 + Math.random() * 4000;
+                
                 setTimeout(() => {
-                    motivationElement.textContent = quotes[Math.floor(Math.random() * quotes.length)];
-                    motivationElement.style.opacity = 1;
-                }, 500);
-            }, 5000);
+                    // Glitch out effect
+                    glitchTextEffect(motivationElement, generateGlitchText(randomQuote.length), () => {
+                        // Brief pause before next quote
+                        setTimeout(() => {
+                            const newQuote = quotes[Math.floor(Math.random() * quotes.length)];
+                            // Glitch in new quote
+                            glitchTextEffect(motivationElement, newQuote, () => {
+                                // Continue the loop
+                                startGlitchLoop();
+                            });
+                        }, 300);
+                    });
+                }, nextGlitch);
+            }
+        }
+        
+        function generateGlitchText(length) {
+            const glitchChars = "!@#$%^&*()_+-=[]{}|;:,.<>?/~\\";
+            let result = "";
+            for (let i = 0; i < length; i++) {
+                result += glitchChars.charAt(Math.floor(Math.random() * glitchChars.length));
+            }
+            return result;
+        }
+        
+        function glitchTextEffect(element, targetText, callback) {
+            const originalText = element.textContent;
+            const steps = 10;
+            let currentStep = 0;
+            
+            const interval = setInterval(() => {
+                // Create intermediate glitched text
+                let glitchedText = "";
+                for (let i = 0; i < targetText.length; i++) {
+                    if (currentStep < steps * 0.7 || Math.random() > currentStep/steps) {
+                        glitchedText += generateGlitchText(1);
+                    } else {
+                        glitchedText += targetText[i];
+                    }
+                }
+                
+                element.textContent = glitchedText;
+                element.style.textShadow = `0 0 ${5 + Math.random() * 10}px #33ff33`;
+                
+                // Play subtle glitch sound
+                if (Math.random() > 0.7 && audioContext) {
+                    playRandomSound(soundEffects.glitch);
+                }
+                
+                currentStep++;
+                if (currentStep >= steps) {
+                    clearInterval(interval);
+                    element.textContent = targetText;
+                    element.style.textShadow = '0 0 5px #33ff33';
+                    if (callback) callback();
+                }
+            }, 50);
+        }
+        
+        function playRandomSound(soundArray) {
+            if (!audioContext) return;
+            const sound = soundArray[Math.floor(Math.random() * soundArray.length)];
+            playSound(sound);
+        }
+        
+        function playSoundSequence(soundArray) {
+            if (!audioContext) return;
+            soundArray.forEach((sound, index) => {
+                setTimeout(() => playSound(sound), index * 150);
+            });
+        }
+        
+        function playSound({freq, type, duration, vol}) {
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.type = type || 'sine';
+                oscillator.frequency.value = freq || 440;
+                gainNode.gain.value = vol || 0.1;
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start();
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + (duration || 0.2));
+                oscillator.stop(audioContext.currentTime + (duration || 0.2));
+            } catch (e) {
+                console.log("Audio error:", e);
+            }
         }
     </script>
 </body>
