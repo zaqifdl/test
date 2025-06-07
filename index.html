@@ -250,377 +250,281 @@
     <div class="glitch" id="glitch"></div>
 
     <script>
-    const messageContainer = document.getElementById('message-container');
-    const button = document.getElementById('countdownButton');
-    const countdownElement = document.getElementById('countdown');
-    const countdownContent = countdownElement.querySelector('.countdown-content');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
-    const progressNumber = document.getElementById('progressNumber');
-    const motivationElement = document.getElementById('motivation');
-    const glitchElement = document.getElementById('glitch');
-    
-    // Personalized quotes for Mel1na
-    const quotes = [
-        "MEL1NA: YOU'RE CRUSHING IT!",
-        "SYSTEM ALERT: MEL1NA IS BRILLIANT",
-        "BAC 2025: MEL1NA'S TIME TO SHINE",
-        "WARNING: MEL1NA'S POTENTIAL OVERFLOW",
-        "ANALYSIS: MEL1NA = SUCCESS",
-        "MEL1NA: SYSTEM OVERRIDE: YOU GOT THIS",
-        "BAC PROTOCOL: MEL1NA WILL EXCEL",
-        "MEL1NA: ERROR 404 - DOUBT NOT FOUND",
-        "MEL1NA: HARD WORK DETECTED",
-        "PREDICTION: MEL1NA WILL ACE THIS",
-        "MEL1NA: CONFIDENCE LEVELS RISING",
-        "MEL1NA: FINAL_EXAM.EXE LOADED"
-    ];
-    
-    // Initialize audio context
-    let audioContext;
-    try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    } catch (e) {
-        console.log("Web Audio API not supported");
-    }
-
-    // =====================
-    // REALISTIC SOUND EFFECTS
-    // =====================
-    function playScreenGlitch() {
-        if (!audioContext) return;
+        const messageContainer = document.getElementById('message-container');
+        const button = document.getElementById('countdownButton');
+        const countdownElement = document.getElementById('countdown');
+        const countdownContent = countdownElement.querySelector('.countdown-content');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const progressNumber = document.getElementById('progressNumber');
+        const motivationElement = document.getElementById('motivation');
+        const glitchElement = document.getElementById('glitch');
         
-        // Main chaotic burst (low-end)
-        const oscillator1 = audioContext.createOscillator();
-        oscillator1.type = 'sawtooth';
-        oscillator1.frequency.setValueAtTime(60, audioContext.currentTime);
-        oscillator1.frequency.exponentialRampToValueAtTime(20, audioContext.currentTime + 1.5);
+        // Personalized quotes for Mel1na
+        const quotes = [
+            "MEL1NA: YOU'RE CRUSHING IT!",
+            "SYSTEM ALERT: MEL1NA IS BRILLIANT",
+            "WARNING: MEL1NA'S POTENTIAL OVERFLOW",
+            "ANALYSIS: MEL1NA = SUCCESS",
+            "MEL1NA: SYSTEM OVERRIDE: YOU GOT THIS",
+            "BAC PROTOCOL: MEL1NA WILL EXCEL",
+            "MEL1NA: ERROR 404 - DOUBT NOT FOUND",
+            "PREDICTION: MEL1NA WILL ACE THIS",
+        ];
         
-        // Mid-range static
-        const oscillator2 = audioContext.createOscillator();
-        oscillator2.type = 'square';
-        oscillator2.frequency.setValueAtTime(800, audioContext.currentTime);
-        oscillator2.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 1.5);
-        
-        // High-frequency noise
-        const noiseBuffer = audioContext.createBuffer(1, audioContext.sampleRate * 1.5, audioContext.sampleRate);
-        const noiseData = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < noiseData.length; i++) {
-            noiseData[i] = Math.random() * 2 - 1;
-        }
-        const noise = audioContext.createBufferSource();
-        noise.buffer = noiseBuffer;
-        
-        // Distortion for chaos
-        const distortion = audioContext.createWaveShaper();
-        distortion.curve = makeDistortionCurve(400);
-        
-        // Connect and play
-        const gainNode = audioContext.createGain();
-        gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 1.5);
-        
-        oscillator1.connect(distortion);
-        oscillator2.connect(distortion);
-        noise.connect(distortion);
-        distortion.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-        
-        oscillator1.start();
-        oscillator2.start();
-        noise.start();
-        oscillator1.stop(audioContext.currentTime + 1.5);
-        oscillator2.stop(audioContext.currentTime + 1.5);
-        noise.stop(audioContext.currentTime + 1.5);
-    }
-
-    function playQuoteGlitch() {
-        if (!audioContext) return;
-        
-        // Sharp electric crackle
-        const crackle = audioContext.createBufferSource();
-        const buffer = audioContext.createBuffer(1, audioContext.sampleRate * 0.3, audioContext.sampleRate);
-        const data = buffer.getChannelData(0);
-        
-        // Generate crackle noise
-        for (let i = 0; i < data.length; i++) {
-            data[i] = Math.random() * 2 - 1;
-            if (i % 100 === 0) data[i] *= 5; // Spikes
-        }
-        
-        // Apply filter to make it "electric"
-        const filter = audioContext.createBiquadFilter();
-        filter.type = 'highpass';
-        filter.frequency.value = 1000;
-        
-        // Connect and play
-        crackle.buffer = buffer;
-        crackle.connect(filter);
-        filter.connect(audioContext.destination);
-        crackle.start();
-        crackle.stop(audioContext.currentTime + 0.3);
-    }
-
-    // Helper for distortion
-    function makeDistortionCurve(amount) {
-        const curve = new Float32Array(65536);
-        for (let i = 0; i < curve.length; i++) {
-            const x = (i - 32768) / 32768;
-            curve[i] = (Math.PI + amount) * x / (Math.PI + amount * Math.abs(x));
-        }
-        return curve;
-    }
-
-    // =====================
-    // REST OF THE CODE (UNCHANGED except sound triggers)
-    // =====================
-    
-    // Initial sequence
-    setTimeout(() => {
-        messageContainer.style.opacity = '0';
+        // Initial sequence
         setTimeout(() => {
-            messageContainer.style.display = 'none';
-            button.style.display = 'block';
+            messageContainer.style.opacity = '0';
             setTimeout(() => {
-                button.style.opacity = '1';
-            }, 10);
-        }, 300);
-    }, 1500);
-    
-    button.addEventListener('click', function() {
-        button.style.opacity = '0';
-        setTimeout(() => {
-            button.style.display = 'none';
-            progressContainer.style.display = 'flex';
+                messageContainer.style.display = 'none';
+                button.style.display = 'block';
+                setTimeout(() => {
+                    button.style.opacity = '1';
+                }, 10);
+            }, 300);
+        }, 1500);
+        
+        button.addEventListener('click', function() {
+            button.style.opacity = '0';
             setTimeout(() => {
-                progressContainer.style.opacity = '1';
-            }, 10);
-            
-            // Loading progress
-            let progress = 0;
-            const baseSpeed = 1.5;
-            const downloadInterval = setInterval(() => {
-                let increment = baseSpeed + Math.random() * 3;
+                button.style.display = 'none';
+                progressContainer.style.display = 'flex';
+                setTimeout(() => {
+                    progressContainer.style.opacity = '1';
+                }, 10);
                 
-                if(Math.random() < 0.1) {
-                    increment += 5 + Math.random() * 10;
-                }
-                
-                if(progress > 95) {
-                    increment *= 0.3;
-                }
-                
-                progress += increment;
-                if (progress > 100) progress = 100;
-                
-                progressFill.style.width = progress + '%';
-                progressText.textContent = Math.floor(progress) + '%';
-                progressNumber.textContent = Math.floor(progress);
-                
-                if(Math.random() < 0.3 && progress < 95) {
-                    progressFill.style.width = (progress + 0.5) + '%';
-                    setTimeout(() => {
-                        progressFill.style.width = progress + '%';
-                    }, 50);
-                }
-                
-                if (progress === 100) {
-                    clearInterval(downloadInterval);
-                    setTimeout(() => {
-                        // PLAY LONG SCREEN GLITCH SOUND
-                        playScreenGlitch();
-                        
-                        glitchElement.style.display = 'block';
-                        for (let i = 0; i < 100; i++) {
-                            const line = document.createElement('div');
-                            line.className = 'glitch-line';
-                            line.style.top = Math.random() * 100 + '%';
-                            line.style.height = (Math.random() * 5 + 1) + 'px';
-                            line.style.opacity = Math.random() * 0.9;
-                            line.style.background = `rgba(255,255,255,${Math.random() * 0.9})`;
-                            line.style.animationDelay = (Math.random() * 0.5) + 's';
-                            line.style.animationDuration = (Math.random() * 0.3 + 0.1) + 's';
-                            glitchElement.appendChild(line);
-                        }
-                        
-                        for (let i = 0; i < 30; i++) {
-                            const box = document.createElement('div');
-                            box.className = 'glitch-box';
-                            box.style.width = (Math.random() * 150 + 30) + 'px';
-                            box.style.height = (Math.random() * 150 + 30) + 'px';
-                            box.style.left = Math.random() * 100 + '%';
-                            box.style.top = Math.random() * 100 + '%';
-                            box.style.opacity = Math.random() * 0.9;
-                            box.style.animationDelay = (Math.random() * 0.5) + 's';
-                            box.style.animationDuration = (Math.random() * 0.3 + 0.1) + 's';
-                            glitchElement.appendChild(box);
-                        }
-                        
-                        for (let i = 0; i < 20; i++) {
-                            const text = document.createElement('div');
-                            text.className = 'glitch-text';
-                            text.textContent = generateRandomText();
-                            text.style.left = Math.random() * 100 + '%';
-                            text.style.top = Math.random() * 100 + '%';
-                            text.style.fontSize = (Math.random() * 20 + 10) + 'px';
-                            text.style.animationDelay = (Math.random() * 0.5) + 's';
-                            glitchElement.appendChild(text);
-                        }
-                        
+                // Loading progress with enhanced effects
+                let progress = 0;
+                const baseSpeed = 1.5;
+                const downloadInterval = setInterval(() => {
+                    let increment = baseSpeed + Math.random() * 3;
+                    
+                    // Random speed boosts
+                    if(Math.random() < 0.1) {
+                        increment += 5 + Math.random() * 10;
+                    }
+                    
+                    // Slow down near 100%
+                    if(progress > 95) {
+                        increment *= 0.3;
+                    }
+                    
+                    progress += increment;
+                    if (progress > 100) progress = 100;
+                    
+                    progressFill.style.width = progress + '%';
+                    progressText.textContent = Math.floor(progress) + '%';
+                    progressNumber.textContent = Math.floor(progress);
+                    
+                    // Random small jumps in progress
+                    if(Math.random() < 0.3 && progress < 95) {
+                        progressFill.style.width = (progress + 0.5) + '%';
                         setTimeout(() => {
-                            glitchElement.style.display = 'none';
-                            glitchElement.innerHTML = '';
-                            progressContainer.style.display = 'none';
-                            countdownElement.style.display = 'block';
-                            decryptText();
-                        }, 1000);
-                    }, 300);
-                }
-            }, 30);
-        }, 300);
-    });
-    
-    function generateRandomText() {
-        const chars = '01!@#$%^&*()_+-=[]{}|;:,.<>?/~';
-        let result = '';
-        for (let i = 0; i < 10; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-    }
-    
-    function decryptText() {
-        const originalText = "Time remaining until BAC 2025:\n\nDays: 000\nHours: 00\nMinutes: 00\nSeconds: 00";
-        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?/~";
-        let iterations = 0;
-        const maxIterations = 30;
-        const decryptInterval = setInterval(() => {
-            let scrambledText = "";
-            for (let i = 0; i < originalText.length; i++) {
-                if (iterations < maxIterations * 0.7 || Math.random() > iterations/maxIterations) {
-                    scrambledText += chars.charAt(Math.floor(Math.random() * chars.length));
-                } else {
-                    scrambledText += originalText.charAt(i);
-                }
-            }
-            countdownContent.textContent = scrambledText;
-            
-            iterations++;
-            if (iterations >= maxIterations) {
-                clearInterval(decryptInterval);
-                countdownContent.textContent = originalText;
-                showCountdown();
-                showRandomQuote();
-            }
-        }, 50);
-    }
-    
-    function showCountdown() {
-        const targetDate = new Date('2025-06-15T00:00:00');
-        
-        function updateCountdown() {
-            const currentDate = new Date();
-            const difference = targetDate - currentDate;
-            
-            if (difference <= 0) {
-                countdownContent.textContent = "BAC TIME HAS COME!\n\nYou're ready Mel1na!\nGo make yourself proud!";
-                motivationElement.textContent = "MEL1NA: FINAL_EXAM_PROTOCOL ENGAGED";
-                motivationElement.style.animation = "textGlow 2s infinite";
-                return;
-            }
-            
-            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-            
-            const countdownText = 
-                `Time remaining until BAC 2025:\n\n` +
-                `Days: ${days.toString().padStart(3, '0')}\n` +
-                `Hours: ${hours.toString().padStart(2, '0')}\n` +
-                `Minutes: ${minutes.toString().padStart(2, '0')}\n` +
-                `Seconds: ${seconds.toString().padStart(2, '0')}`;
-            
-            countdownContent.textContent = countdownText;
-            
-            if(days === 0 && hours < 24) {
-                countdownElement.style.animation = 'textGlow 1s infinite';
-            }
-        }
-        
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-    }
-    
-    function showRandomQuote() {
-        motivationElement.style.display = 'block';
-        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        
-        // PLAY SHORT QUOTE GLITCH SOUND
-        playQuoteGlitch();
-        
-        glitchTextEffect(motivationElement, randomQuote, () => {
-            startGlitchLoop();
+                            progressFill.style.width = progress + '%';
+                        }, 50);
+                    }
+                    
+                    if (progress === 100) {
+                        clearInterval(downloadInterval);
+                        setTimeout(() => {
+                            // Create enhanced glitch effect
+                            glitchElement.style.display = 'block';
+                            
+                            // Add intense glitch lines
+                            for (let i = 0; i < 100; i++) {
+                                const line = document.createElement('div');
+                                line.className = 'glitch-line';
+                                line.style.top = Math.random() * 100 + '%';
+                                line.style.height = (Math.random() * 5 + 1) + 'px';
+                                line.style.opacity = Math.random() * 0.9;
+                                line.style.background = `rgba(255,255,255,${Math.random() * 0.9})`;
+                                line.style.animationDelay = (Math.random() * 0.5) + 's';
+                                line.style.animationDuration = (Math.random() * 0.3 + 0.1) + 's';
+                                glitchElement.appendChild(line);
+                            }
+                            
+                            // Add random glitch boxes
+                            for (let i = 0; i < 30; i++) {
+                                const box = document.createElement('div');
+                                box.className = 'glitch-box';
+                                box.style.width = (Math.random() * 150 + 30) + 'px';
+                                box.style.height = (Math.random() * 150 + 30) + 'px';
+                                box.style.left = Math.random() * 100 + '%';
+                                box.style.top = Math.random() * 100 + '%';
+                                box.style.opacity = Math.random() * 0.9;
+                                box.style.animationDelay = (Math.random() * 0.5) + 's';
+                                box.style.animationDuration = (Math.random() * 0.3 + 0.1) + 's';
+                                glitchElement.appendChild(box);
+                            }
+                            
+                            // Add glitch text fragments
+                            for (let i = 0; i < 20; i++) {
+                                const text = document.createElement('div');
+                                text.className = 'glitch-text';
+                                text.textContent = generateRandomText();
+                                text.style.left = Math.random() * 100 + '%';
+                                text.style.top = Math.random() * 100 + '%';
+                                text.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                                text.style.animationDelay = (Math.random() * 0.5) + 's';
+                                glitchElement.appendChild(text);
+                            }
+                            
+                            // Hide glitch after effect
+                            setTimeout(() => {
+                                glitchElement.style.display = 'none';
+                                glitchElement.innerHTML = '';
+                                progressContainer.style.display = 'none';
+                                countdownElement.style.display = 'block';
+                                decryptText();
+                            }, 1000);
+                        }, 300);
+                    }
+                }, 30);
+            }, 300);
         });
         
-        function startGlitchLoop() {
-            const nextGlitch = 3000 + Math.random() * 4000;
-            
-            setTimeout(() => {
-                // PLAY SHORT GLITCH BEFORE CHANGE
-                playQuoteGlitch();
-                
-                glitchTextEffect(motivationElement, generateGlitchText(randomQuote.length), () => {
-                    setTimeout(() => {
-                        const newQuote = quotes[Math.floor(Math.random() * quotes.length)];
-                        // PLAY SHORT GLITCH FOR NEW QUOTE
-                        playQuoteGlitch();
-                        glitchTextEffect(motivationElement, newQuote, () => {
-                            startGlitchLoop();
-                        });
-                    }, 300);
-                });
-            }, nextGlitch);
+        function generateRandomText() {
+            const chars = '01!@#$%^&*()_+-=[]{}|;:,.<>?/~';
+            let result = '';
+            for (let i = 0; i < 10; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
         }
-    }
-    
-    function generateGlitchText(length) {
-        const glitchChars = "!@#$%^&*()_+-=[]{}|;:,.<>?/~\\";
-        let result = "";
-        for (let i = 0; i < length; i++) {
-            result += glitchChars.charAt(Math.floor(Math.random() * glitchChars.length));
-        }
-        return result;
-    }
-    
-    function glitchTextEffect(element, targetText, callback) {
-        const originalText = element.textContent;
-        const steps = 10;
-        let currentStep = 0;
         
-        const interval = setInterval(() => {
-            let glitchedText = "";
-            for (let i = 0; i < targetText.length; i++) {
-                if (currentStep < steps * 0.7 || Math.random() > currentStep/steps) {
-                    glitchedText += generateGlitchText(1);
-                } else {
-                    glitchedText += targetText[i];
+        function decryptText() {
+            const originalText = "Time remaining until BAC 2025:\n\nDays: 000\nHours: 00\nMinutes: 00\nSeconds: 00";
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?/~";
+            let iterations = 0;
+            const maxIterations = 30;
+            const decryptInterval = setInterval(() => {
+                let scrambledText = "";
+                for (let i = 0; i < originalText.length; i++) {
+                    if (iterations < maxIterations * 0.7 || Math.random() > iterations/maxIterations) {
+                        scrambledText += chars.charAt(Math.floor(Math.random() * chars.length));
+                    } else {
+                        scrambledText += originalText.charAt(i);
+                    }
+                }
+                countdownContent.textContent = scrambledText;
+                
+                iterations++;
+                if (iterations >= maxIterations) {
+                    clearInterval(decryptInterval);
+                    countdownContent.textContent = originalText;
+                    showCountdown();
+                    showRandomQuote();
+                }
+            }, 50);
+        }
+        
+        function showCountdown() {
+            const targetDate = new Date('2025-06-15T00:00:00');
+            
+            function updateCountdown() {
+                const currentDate = new Date();
+                const difference = targetDate - currentDate;
+                
+                if (difference <= 0) {
+                    countdownContent.textContent = "BAC TIME HAS COME!\n\nYou're ready Mel1na!\nGo make yourself proud!";
+                    motivationElement.textContent = "MEL1NA: FINAL_EXAM_PROTOCOL ENGAGED";
+                    motivationElement.style.animation = "textGlow 2s infinite";
+                    return;
+                }
+                
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                
+                const countdownText = 
+                    `Time remaining until BAC 2025:\n\n` +
+                    `Days: ${days.toString().padStart(3, '0')}\n` +
+                    `Hours: ${hours.toString().padStart(2, '0')}\n` +
+                    `Minutes: ${minutes.toString().padStart(2, '0')}\n` +
+                    `Seconds: ${seconds.toString().padStart(2, '0')}`;
+                
+                countdownContent.textContent = countdownText;
+                
+                // Add pulsing effect when <24h remains
+                if(days === 0 && hours < 24) {
+                    countdownElement.style.animation = 'textGlow 1s infinite';
                 }
             }
             
-            element.textContent = glitchedText;
-            element.style.textShadow = `0 0 ${5 + Math.random() * 10}px #33ff33`;
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+        
+        function showRandomQuote() {
+            motivationElement.style.display = 'block';
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
             
-            currentStep++;
-            if (currentStep >= steps) {
-                clearInterval(interval);
-                element.textContent = targetText;
-                element.style.textShadow = '0 0 5px #33ff33';
-                if (callback) callback();
+            // Initial glitch-in effect
+            glitchTextEffect(motivationElement, randomQuote, () => {
+                // After appearing, start the glitch loop
+                startGlitchLoop();
+            });
+            
+            function startGlitchLoop() {
+                // Random duration before next glitch (3-7 seconds)
+                const nextGlitch = 3000 + Math.random() * 4000;
+                
+                setTimeout(() => {
+                    // Glitch out effect
+                    glitchTextEffect(motivationElement, generateGlitchText(randomQuote.length), () => {
+                        // Brief pause before next quote
+                        setTimeout(() => {
+                            const newQuote = quotes[Math.floor(Math.random() * quotes.length)];
+                            // Glitch in new quote
+                            glitchTextEffect(motivationElement, newQuote, () => {
+                                // Continue the loop
+                                startGlitchLoop();
+                            });
+                        }, 300);
+                    });
+                }, nextGlitch);
             }
-        }, 50);
-    }
-</script>
+        }
+        
+        function generateGlitchText(length) {
+            const glitchChars = "!@#$%^&*()_+-=[]{}|;:,.<>?/~\\";
+            let result = "";
+            for (let i = 0; i < length; i++) {
+                result += glitchChars.charAt(Math.floor(Math.random() * glitchChars.length));
+            }
+            return result;
+        }
+        
+        function glitchTextEffect(element, targetText, callback) {
+            const originalText = element.textContent;
+            const steps = 10;
+            let currentStep = 0;
+            
+            const interval = setInterval(() => {
+                // Create intermediate glitched text
+                let glitchedText = "";
+                for (let i = 0; i < targetText.length; i++) {
+                    if (currentStep < steps * 0.7 || Math.random() > currentStep/steps) {
+                        glitchedText += generateGlitchText(1);
+                    } else {
+                        glitchedText += targetText[i];
+                    }
+                }
+                
+                element.textContent = glitchedText;
+                element.style.textShadow = `0 0 ${5 + Math.random() * 10}px #33ff33`;
+                
+                currentStep++;
+                if (currentStep >= steps) {
+                    clearInterval(interval);
+                    element.textContent = targetText;
+                    element.style.textShadow = '0 0 5px #33ff33';
+                    if (callback) callback();
+                }
+            }, 50);
+        }
+    </script>
 </body>
 </html>
