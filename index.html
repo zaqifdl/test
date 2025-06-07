@@ -24,6 +24,20 @@
             position: relative;
             touch-action: manipulation;
         }
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at var(--x) var(--y), 
+                        rgba(51,255,51,0.1) 0%, 
+                        transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
+        }
         #message-container {
             height: 24px;
             display: flex;
@@ -33,6 +47,8 @@
             margin-bottom: 20px;
             transition: all 0.3s;
             font-size: clamp(12px, 4vw, 18px);
+            position: relative;
+            z-index: 3;
         }
         button {
             padding: 12px 24px;
@@ -50,28 +66,12 @@
             transition: all 0.3s;
             display: none;
             position: relative;
+            z-index: 3;
             -webkit-appearance: none;
         }
         button:hover, button:active {
             background-color: #004400;
             box-shadow: 0 0 10px #33ff33;
-        }
-        #countdown {
-            font-size: clamp(14px, 4vw, 18px);
-            display: none;
-            line-height: 1.3;
-            margin: 20px auto 0;
-            text-align: center;
-            width: 100%;
-            max-width: 600px;
-            overflow-wrap: break-word;
-        }
-        .countdown-content {
-            display: inline-block;
-            text-align: left;
-            white-space: pre;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 0.5px;
         }
         .progress-container {
             width: 100%;
@@ -80,6 +80,8 @@
             display: none;
             flex-direction: column;
             align-items: center;
+            position: relative;
+            z-index: 3;
         }
         .progress-bar {
             height: 20px;
@@ -146,6 +148,7 @@
             position: relative;
             text-align: center;
             padding: 0 10px;
+            z-index: 3;
         }
         .glitch {
             position: fixed;
@@ -270,13 +273,91 @@
                 text-shadow: 0 0 5px #33ff33;
             }
         }
+        .countdown-number {
+            display: inline-block;
+            min-width: 1ch;
+            text-align: center;
+            margin: 0 -1px;
+        }
+        .countdown-number.changing {
+            animation: numberGlitch 0.3s;
+            position: relative;
+        }
+        @keyframes numberGlitch {
+            0% { transform: translate(0); text-shadow: 0 0 5px #33ff33; }
+            20% { transform: translate(-2px, 2px); opacity: 0.8; }
+            40% { transform: translate(2px, -1px); color: #fff; }
+            60% { transform: translate(-1px, 1px); opacity: 0.9; }
+            80% { transform: translate(1px, -2px); color: #33ff33; }
+            100% { transform: translate(0); text-shadow: 0 0 5px #33ff33; }
+        }
+        .countdown-ending {
+            animation: dangerPulse 0.5s infinite alternate;
+        }
+        @keyframes dangerPulse {
+            from { color: #33ff33; }
+            to { color: #ff3333; }
+        }
+        /* New Terminal Styles */
+        .terminal {
+            background-color: #000;
+            border: 2px solid #33ff33;
+            border-radius: 5px;
+            padding: 20px;
+            width: 90%;
+            max-width: 700px;
+            margin: 20px auto;
+            position: relative;
+            box-shadow: 0 0 15px #33ff33;
+            font-family: 'Courier New', monospace;
+            display: none;
+        }
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #33ff33;
+        }
+        .terminal-buttons {
+            display: flex;
+            margin-right: 10px;
+        }
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .terminal-btn.red { background: #ff5f56; }
+        .terminal-btn.yellow { background: #ffbd2e; }
+        .terminal-btn.green { background: #27c93f; }
+        .terminal-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        @media (max-width: 600px) {
+            .progress-bar {
+                height: 15px;
+            }
+            button {
+                padding: 10px 20px;
+            }
+            .progress-text {
+                font-size: 10px;
+                line-height: 15px;
+            }
+            .terminal {
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="noise"></div>
     <div class="crt-effect"></div>
     <div id="message-container">INITIALIZING SYSTEM...</div>
-    <button id="countdownButton">ACTIVATE COUNTDOWN</button>
+    <button id="countdownButton" aria-live="polite" aria-label="Activate BAC countdown timer">ACTIVATE COUNTDOWN</button>
     <div class="progress-container" id="progressContainer">
         <div class="progress-bar">
             <div class="progress-fill" id="progressFill"></div>
@@ -284,23 +365,39 @@
         </div>
         <div class="progress-number" id="progressNumber">0</div>
     </div>
-    <div id="countdown">
-        <div class="countdown-content"></div>
+    <div class="terminal" id="terminal">
+        <div class="terminal-header">
+            <div class="terminal-buttons">
+                <div class="terminal-btn red"></div>
+                <div class="terminal-btn yellow"></div>
+                <div class="terminal-btn green"></div>
+            </div>
+            <div class="terminal-title">BAC_COUNTDOWN_V2.0.5</div>
+        </div>
+        <div id="countdown" role="timer" aria-live="polite">
+            <div class="countdown-content"></div>
+        </div>
     </div>
     <div class="motivation" id="motivation"></div>
     <div class="glitch" id="glitch"></div>
 
     <script>
-        const messageContainer = document.getElementById('message-container');
-        const button = document.getElementById('countdownButton');
-        const countdownElement = document.getElementById('countdown');
-        const countdownContent = countdownElement.querySelector('.countdown-content');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressFill = document.getElementById('progressFill');
-        const progressText = document.getElementById('progressText');
-        const progressNumber = document.getElementById('progressNumber');
-        const motivationElement = document.getElementById('motivation');
-        const glitchElement = document.getElementById('glitch');
+        // Cache DOM elements
+        const elements = {
+            message: document.getElementById('message-container'),
+            button: document.getElementById('countdownButton'),
+            progressContainer: document.getElementById('progressContainer'),
+            progressFill: document.getElementById('progressFill'),
+            progressText: document.getElementById('progressText'),
+            progressNumber: document.getElementById('progressNumber'),
+            motivation: document.getElementById('motivation'),
+            glitch: document.getElementById('glitch'),
+            noise: document.querySelector('.noise'),
+            crt: document.querySelector('.crt-effect'),
+            terminal: document.getElementById('terminal'),
+            countdown: document.getElementById('countdown'),
+            countdownContent: document.querySelector('.countdown-content')
+        };
         
         // Personalized quotes for Mel1na
         const quotes = [
@@ -317,117 +414,142 @@
             "MEL1NA: CONFIDENCE LEVELS RISING",
             "MEL1NA: FINAL_EXAM.EXE LOADED"
         ];
+        let lastQuoteIndex = -1;
+        
+        // Track mouse for dynamic background
+        document.addEventListener('mousemove', (e) => {
+            document.body.style.setProperty('--x', `${e.clientX}px`);
+            document.body.style.setProperty('--y', `${e.clientY}px`);
+        });
         
         // Initial sequence
         setTimeout(() => {
-            messageContainer.style.opacity = '0';
+            elements.message.style.opacity = '0';
             setTimeout(() => {
-                messageContainer.style.display = 'none';
-                button.style.display = 'block';
+                elements.message.style.display = 'none';
+                elements.button.style.display = 'block';
                 setTimeout(() => {
-                    button.style.opacity = '1';
+                    elements.button.style.opacity = '1';
                 }, 10);
             }, 300);
         }, 1500);
         
-        button.addEventListener('click', function() {
-            button.style.opacity = '0';
+        elements.button.addEventListener('click', function() {
+            this.style.opacity = '0';
             setTimeout(() => {
-                button.style.display = 'none';
-                progressContainer.style.display = 'flex';
+                this.style.display = 'none';
+                elements.progressContainer.style.display = 'flex';
                 setTimeout(() => {
-                    progressContainer.style.opacity = '1';
+                    elements.progressContainer.style.opacity = '1';
                 }, 10);
                 
-                // Loading progress with enhanced effects
-                let progress = 0;
-                const baseSpeed = 1.5;
-                const downloadInterval = setInterval(() => {
-                    let increment = baseSpeed + Math.random() * 3;
-                    
-                    // Random speed boosts
-                    if(Math.random() < 0.1) {
-                        increment += 5 + Math.random() * 10;
-                    }
-                    
-                    // Slow down near 100%
-                    if(progress > 95) {
-                        increment *= 0.3;
-                    }
-                    
-                    progress += increment;
-                    if (progress > 100) progress = 100;
-                    
-                    progressFill.style.width = progress + '%';
-                    progressText.textContent = Math.floor(progress) + '%';
-                    progressNumber.textContent = Math.floor(progress);
-                    
-                    // Random small jumps in progress
-                    if(Math.random() < 0.3 && progress < 95) {
-                        progressFill.style.width = (progress + 0.5) + '%';
-                        setTimeout(() => {
-                            progressFill.style.width = progress + '%';
-                        }, 50);
-                    }
-                    
-                    if (progress === 100) {
-                        clearInterval(downloadInterval);
-                        setTimeout(() => {
-                            // Create enhanced glitch effect
-                            glitchElement.style.display = 'block';
-                            
-                            // Add intense glitch lines
-                            for (let i = 0; i < 100; i++) {
-                                const line = document.createElement('div');
-                                line.className = 'glitch-line';
-                                line.style.top = Math.random() * 100 + '%';
-                                line.style.height = (Math.random() * 5 + 1) + 'px';
-                                line.style.opacity = Math.random() * 0.9;
-                                line.style.background = `rgba(255,255,255,${Math.random() * 0.9})`;
-                                line.style.animationDelay = (Math.random() * 0.5) + 's';
-                                line.style.animationDuration = (Math.random() * 0.3 + 0.1) + 's';
-                                glitchElement.appendChild(line);
-                            }
-                            
-                            // Add random glitch boxes
-                            for (let i = 0; i < 30; i++) {
-                                const box = document.createElement('div');
-                                box.className = 'glitch-box';
-                                box.style.width = (Math.random() * 150 + 30) + 'px';
-                                box.style.height = (Math.random() * 150 + 30) + 'px';
-                                box.style.left = Math.random() * 100 + '%';
-                                box.style.top = Math.random() * 100 + '%';
-                                box.style.opacity = Math.random() * 0.9;
-                                box.style.animationDelay = (Math.random() * 0.5) + 's';
-                                box.style.animationDuration = (Math.random() * 0.3 + 0.1) + 's';
-                                glitchElement.appendChild(box);
-                            }
-                            
-                            // Add glitch text fragments
-                            for (let i = 0; i < 20; i++) {
-                                const text = document.createElement('div');
-                                text.className = 'glitch-text';
-                                text.textContent = generateRandomText();
-                                text.style.left = Math.random() * 100 + '%';
-                                text.style.top = Math.random() * 100 + '%';
-                                text.style.fontSize = (Math.random() * 20 + 10) + 'px';
-                                text.style.animationDelay = (Math.random() * 0.5) + 's';
-                                glitchElement.appendChild(text);
-                            }
-                            
-                            // Hide glitch after effect
-                            setTimeout(() => {
-                                glitchElement.style.display = 'none';
-                                glitchElement.innerHTML = '';
-                                progressContainer.style.display = 'none';
-                                countdownElement.style.display = 'block';
-                                decryptText();
-                            }, 1000);
-                        }, 300);
-                    }
-                }, 30);
+                startProgressAnimation();
             }, 300);
         });
+        
+        function startProgressAnimation() {
+            let progress = 0;
+            const baseSpeed = 1.5;
+            let animationFrameId;
+            
+            function updateProgress() {
+                let increment = baseSpeed + Math.random() * 3;
+                
+                // Random speed boosts
+                if(Math.random() < 0.1) {
+                    increment += 5 + Math.random() * 10;
+                }
+                
+                // Slow down near 100%
+                if(progress > 95) {
+                    increment *= 0.3;
+                }
+                
+                progress += increment;
+                if (progress > 100) progress = 100;
+                
+                elements.progressFill.style.width = progress + '%';
+                elements.progressText.textContent = Math.floor(progress) + '%';
+                elements.progressNumber.textContent = Math.floor(progress);
+                
+                // Random small jumps in progress
+                if(Math.random() < 0.3 && progress < 95) {
+                    elements.progressFill.style.width = (progress + 0.5) + '%';
+                    setTimeout(() => {
+                        elements.progressFill.style.width = progress + '%';
+                    }, 50);
+                }
+                
+                if (progress < 100) {
+                    animationFrameId = requestAnimationFrame(updateProgress);
+                } else {
+                    cancelAnimationFrame(animationFrameId);
+                    completeLoading();
+                }
+            }
+            
+            updateProgress();
+        }
+        
+        function completeLoading() {
+            // Create enhanced glitch effect
+            elements.glitch.style.display = 'block';
+            createGlitchElements();
+            
+            // Hide glitch after effect
+            setTimeout(() => {
+                elements.glitch.style.display = 'none';
+                elements.glitch.innerHTML = '';
+                elements.progressContainer.style.display = 'none';
+                elements.terminal.style.display = 'block';
+                decryptText();
+            }, 1000);
+        }
+        
+        function createGlitchElements() {
+            const fragment = document.createDocumentFragment();
+            
+            // Add glitch lines
+            for (let i = 0; i < 100; i++) {
+                const line = document.createElement('div');
+                line.className = 'glitch-line';
+                line.style.top = Math.random() * 100 + '%';
+                line.style.height = (Math.random() * 5 + 1) + 'px';
+                line.style.opacity = Math.random() * 0.9;
+                line.style.background = `rgba(255,255,255,${Math.random() * 0.9})`;
+                line.style.animationDelay = (Math.random() * 0.5) + 's';
+                line.style.animationDuration = (Math.random() * 0.3 + 0.1) + 's';
+                fragment.appendChild(line);
+            }
+            
+            // Add random glitch boxes
+            for (let i = 0; i < 30; i++) {
+                const box = document.createElement('div');
+                box.className = 'glitch-box';
+                box.style.width = (Math.random() * 150 + 30) + 'px';
+                box.style.height = (Math.random() * 150 + 30) + 'px';
+                box.style.left = Math.random() * 100 + '%';
+                box.style.top = Math.random() * 100 + '%';
+                box.style.opacity = Math.random() * 0.9;
+                box.style.animationDelay = (Math.random() * 0.5) + 's';
+                box.style.animationDuration = (Math.random() * 0.3 + 0.1) + 's';
+                fragment.appendChild(box);
+            }
+            
+            // Add glitch text fragments
+            for (let i = 0; i < 20; i++) {
+                const text = document.createElement('div');
+                text.className = 'glitch-text';
+                text.textContent = generateRandomText();
+                text.style.left = Math.random() * 100 + '%';
+                text.style.top = Math.random() * 100 + '%';
+                text.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                text.style.animationDelay = (Math.random() * 0.5) + 's';
+                fragment.appendChild(text);
+            }
+            
+            elements.glitch.appendChild(fragment);
+        }
         
         function generateRandomText() {
             const chars = '01!@#$%^&*()_+-=[]{}|;:,.<>?/~';
@@ -443,6 +565,7 @@
             const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?/~";
             let iterations = 0;
             const maxIterations = 30;
+            
             const decryptInterval = setInterval(() => {
                 let scrambledText = "";
                 for (let i = 0; i < originalText.length; i++) {
@@ -452,19 +575,18 @@
                         scrambledText += originalText.charAt(i);
                     }
                 }
-                countdownContent.textContent = scrambledText;
+                elements.countdownContent.textContent = scrambledText;
                 
                 iterations++;
                 if (iterations >= maxIterations) {
                     clearInterval(decryptInterval);
-                    // Enhanced final reveal with character animations
                     revealFinalText(originalText);
                 }
             }, 50);
         }
         
         function revealFinalText(text) {
-            countdownContent.innerHTML = '';
+            elements.countdownContent.innerHTML = '';
             const decryptionEffect = document.createElement('div');
             decryptionEffect.className = 'decryption-effect';
             
@@ -484,47 +606,83 @@
                 }
             });
             
-            countdownContent.appendChild(decryptionEffect);
+            elements.countdownContent.appendChild(decryptionEffect);
             
-            // After animation completes, show countdown
             setTimeout(() => {
-                showCountdown();
+                startCountdown();
                 showRandomQuote();
-            }, lines.length * 10 * 50 + 300); // Estimate animation completion time
+            }, lines.length * 10 * 50 + 300);
         }
         
-        function showCountdown() {
-            const targetDate = new Date('2025-06-15T00:00:00');
-            
+        function startCountdown() {
+            const targetDate = new Date('2025-06-15T00:00:00+02:00'); // Paris timezone
+            let previousValues = {
+                days: '000',
+                hours: '00',
+                minutes: '00',
+                seconds: '00'
+            };
+
             function updateCountdown() {
                 const currentDate = new Date();
                 const difference = targetDate - currentDate;
                 
                 if (difference <= 0) {
-                    countdownContent.innerHTML = "BAC TIME HAS COME!<br><br>You're ready Mel1na!<br>Go make yourself proud!";
-                    motivationElement.textContent = "MEL1NA: FINAL_EXAM_PROTOCOL ENGAGED";
-                    motivationElement.style.animation = "textGlow 2s infinite";
+                    elements.countdownContent.innerHTML = "BAC TIME HAS COME!<br><br>You're ready Mel1na!<br>Go make yourself proud!";
+                    elements.motivation.textContent = "MEL1NA: FINAL_EXAM_PROTOCOL ENGAGED";
+                    elements.motivation.style.animation = "textGlow 2s infinite";
+                    elements.countdown.classList.add('countdown-ending');
                     return;
                 }
                 
-                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24)).toString().padStart(3, '0');
+                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+                const seconds = Math.floor((difference % (1000 * 60)) / 1000).toString().padStart(2, '0');
                 
+                // Format with animation spans
                 const countdownText = 
                     `Time remaining until BAC 2025:\n\n` +
-                    `Days: ${days.toString().padStart(3, '0')}\n` +
-                    `Hours: ${hours.toString().padStart(2, '0')}\n` +
-                    `Minutes: ${minutes.toString().padStart(2, '0')}\n` +
-                    `Seconds: ${seconds.toString().padStart(2, '0')}`;
+                    `Days: ${formatWithAnimation('days', days, previousValues.days)}\n` +
+                    `Hours: ${formatWithAnimation('hours', hours, previousValues.hours)}\n` +
+                    `Minutes: ${formatWithAnimation('minutes', minutes, previousValues.minutes)}\n` +
+                    `Seconds: ${formatWithAnimation('seconds', seconds, previousValues.seconds)}`;
                 
-                countdownContent.textContent = countdownText;
+                elements.countdownContent.innerHTML = countdownText.replace(/\n/g, '<br>');
                 
-                // Add pulsing effect when <24h remains
-                if(days === 0 && hours < 24) {
-                    countdownElement.style.animation = 'textGlow 1s infinite';
+                // Update previous values
+                previousValues = { days, hours, minutes, seconds };
+                
+                // Add special effects when time is running out
+                if(days === '000') {
+                    if (parseInt(hours) < 24) {
+                        elements.countdown.style.animation = 'textGlow 1s infinite';
+                    }
+                    if (parseInt(hours) < 1) {
+                        elements.countdown.classList.add('countdown-ending');
+                    }
                 }
+            }
+            
+            function formatWithAnimation(type, currentValue, previousValue) {
+                let result = '';
+                for (let i = 0; i < currentValue.length; i++) {
+                    const charChanged = currentValue[i] !== previousValue[i];
+                    const spanClass = charChanged ? 'countdown-number changing' : 'countdown-number';
+                    result += `<span class="${spanClass}">${currentValue[i]}</span>`;
+                    
+                    if (charChanged) {
+                        setTimeout(() => {
+                            const spans = elements.countdownContent.querySelectorAll('.countdown-number');
+                            spans.forEach(span => {
+                                if (span.classList.contains('changing')) {
+                                    span.classList.remove('changing');
+                                }
+                            });
+                        }, 300);
+                    }
+                }
+                return result;
             }
             
             updateCountdown();
@@ -532,34 +690,38 @@
         }
         
         function showRandomQuote() {
-            motivationElement.style.display = 'block';
-            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            elements.motivation.style.display = 'block';
+            const randomQuote = getRandomQuote();
             
             // Initial glitch-in effect
-            glitchTextEffect(motivationElement, randomQuote, () => {
-                // After appearing, start the glitch loop
+            glitchTextEffect(elements.motivation, randomQuote, () => {
                 startGlitchLoop();
             });
             
             function startGlitchLoop() {
-                // Random duration before next glitch (3-7 seconds)
                 const nextGlitch = 3000 + Math.random() * 4000;
                 
                 setTimeout(() => {
-                    // Glitch out effect
-                    glitchTextEffect(motivationElement, generateGlitchText(randomQuote.length), () => {
-                        // Brief pause before next quote
+                    glitchTextEffect(elements.motivation, generateGlitchText(randomQuote.length), () => {
                         setTimeout(() => {
-                            const newQuote = quotes[Math.floor(Math.random() * quotes.length)];
-                            // Glitch in new quote
-                            glitchTextEffect(motivationElement, newQuote, () => {
-                                // Continue the loop
+                            const newQuote = getRandomQuote();
+                            glitchTextEffect(elements.motivation, newQuote, () => {
                                 startGlitchLoop();
                             });
                         }, 300);
                     });
                 }, nextGlitch);
             }
+        }
+        
+        function getRandomQuote() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * quotes.length);
+            } while (newIndex === lastQuoteIndex && quotes.length > 1);
+            
+            lastQuoteIndex = newIndex;
+            return quotes[newIndex];
         }
         
         function generateGlitchText(length) {
@@ -577,7 +739,6 @@
             let currentStep = 0;
             
             const interval = setInterval(() => {
-                // Create intermediate glitched text
                 let glitchedText = "";
                 for (let i = 0; i < targetText.length; i++) {
                     if (currentStep < steps * 0.7 || Math.random() > currentStep/steps) {
@@ -599,6 +760,14 @@
                 }
             }, 50);
         }
+        
+        // Save last view time
+        function saveViewTime() {
+            localStorage.setItem('lastBACView', new Date().toISOString());
+        }
+        
+        // Add beforeunload event to save view time
+        window.addEventListener('beforeunload', saveViewTime);
     </script>
 </body>
 </html>
