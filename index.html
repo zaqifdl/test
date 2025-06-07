@@ -383,7 +383,23 @@
             font-family: 'Courier New', monospace;
             display: none;
             overflow: hidden;
+            background-color: #000 !important;
+    z-index: 100; /* Higher than all background elements */
+    position: relative; /* Creates new stacking context */
+    border: 2px solid #33ff33;
+    box-shadow: 0 0 15px #33ff33, 0 0 30px rgba(51, 255, 51, 0.3) !important;
         }
+        .terminal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #000;
+    z-index: -1;
+    border: inherit;
+}
         .terminal-header {
             display: flex;
             align-items: center;
@@ -429,6 +445,48 @@
                 padding: 15px;
             }
         }
+        /* Add these new styles */
+.grid-lines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(to right, rgba(51, 255, 51, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(51, 255, 51, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+    animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 40px; }
+}
+
+.particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background-color: rgba(51, 255, 51, 0.6);
+    border-radius: 50%;
+    animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+    to { transform: translateY(-100vh); }
+}
     </style>
 </head>
 <body>
@@ -787,29 +845,22 @@
         }
         
         function showRandomQuote() {
-            elements.motivation.style.display = 'block';
-            const randomQuote = getRandomQuote();
-            
-            // Initial glitch-in effect
-            glitchTextEffect(elements.motivation, randomQuote, () => {
-                startGlitchLoop();
-            });
-            
-            function startGlitchLoop() {
-                const nextGlitch = 3000 + Math.random() * 4000;
-                
-                setTimeout(() => {
-                    glitchTextEffect(elements.motivation, generateGlitchText(randomQuote.length), () => {
-                        setTimeout(() => {
-                            const newQuote = getRandomQuote();
-                            glitchTextEffect(elements.motivation, newQuote, () => {
-                                startGlitchLoop();
-                            });
-                        }, 300);
-                    });
-                }, nextGlitch);
-            }
+    elements.motivation.style.display = 'block';
+    let currentQuoteIndex = 0;
+    
+    const showNextQuote = () => {
+        if (currentQuoteIndex >= quotes.length) {
+            currentQuoteIndex = 0; // Loop back to first quote
         }
+        
+        glitchTextEffect(elements.motivation, quotes[currentQuoteIndex], () => {
+            currentQuoteIndex++;
+            setTimeout(showNextQuote, 3000); // Show next quote after 3 seconds
+        });
+    };
+    
+    showNextQuote();
+}
         
         function getRandomQuote() {
             let newIndex;
@@ -860,42 +911,65 @@
         
         // Background glitch effects
         function createBackgroundGlitches() {
-            const glitchContainer = document.createElement('div');
-            glitchContainer.className = 'bg-glitch';
+    // Create moving grid
+    const grid = document.createElement('div');
+    grid.className = 'grid-lines';
+    document.body.appendChild(grid);
+
+    // Create particles
+    const particlesContainer = document.createElement('div');
+    particlesContainer.className = 'particles';
+    document.body.appendChild(particlesContainer);
+
+    // Generate particles
+    for (let i = 0; i < 100; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.opacity = Math.random() * 0.7 + 0.3;
+        particle.style.animationDuration = (Math.random() * 20 + 10) + 's';
+        particle.style.animationDelay = (Math.random() * 5) + 's';
+        particlesContainer.appendChild(particle);
+    }
+
+    // Random glitch effects
+    setInterval(() => {
+    if (Math.random() < 0.3) {
+        const terminalRect = elements.terminal.getBoundingClientRect();
+        let x, y;
+        
+        // Ensure glitches don't spawn inside terminal
+        do {
+            x = Math.random() * 80 + 10;
+            y = Math.random() * 80 + 10;
+        } while (
+            x > (terminalRect.left/window.innerWidth)*100 - 5 && 
+            x < ((terminalRect.right)/window.innerWidth)*100 + 5 &&
+            y > (terminalRect.top/window.innerHeight)*100 - 5 && 
+            y < ((terminalRect.bottom)/window.innerHeight)*100 + 5
+        );
+
+        // Rest of the glitch creation code...
+    }
+        
+        if (Math.random() < 0.3) {
+            const glitch = document.createElement('div');
+            glitch.className = 'bg-glitch';
+            glitch.style.left = Math.random() * 80 + 10 + '%';
+            glitch.style.top = Math.random() * 80 + 10 + '%';
+            glitch.style.width = Math.random() * 200 + 50 + 'px';
+            glitch.style.height = Math.random() * 200 + 50 + 'px';
+            glitch.style.opacity = Math.random() * 0.3 + 0.1;
+            glitch.style.animation = 'bg-glitch-pixel ' + (Math.random() * 0.5 + 0.3) + 's';
+            document.body.appendChild(glitch);
             
-            // Create horizontal glitch lines
-            for (let i = 0; i < 15; i++) {
-                const line = document.createElement('div');
-                line.className = 'bg-glitch-line';
-                line.style.top = Math.random() * 100 + '%';
-                line.style.animationDelay = Math.random() * 5 + 's';
-                line.style.animationDuration = 3 + Math.random() * 4 + 's';
-                glitchContainer.appendChild(line);
-            }
-            
-            // Create random pixel glitches
-            for (let i = 0; i < 30; i++) {
-                const pixel = document.createElement('div');
-                pixel.className = 'bg-glitch-pixel';
-                pixel.style.left = Math.random() * 100 + '%';
-                pixel.style.top = Math.random() * 100 + '%';
-                pixel.style.animationDelay = Math.random() * 10 + 's';
-                pixel.style.animationDuration = 2 + Math.random() * 3 + 's';
-                glitchContainer.appendChild(pixel);
-            }
-            
-            document.body.appendChild(glitchContainer);
-            
-            // Random brightness fluctuation
-            setInterval(() => {
-                if (Math.random() < 0.3) {
-                    document.body.style.backgroundColor = `rgba(${Math.floor(Math.random() * 10)}, ${Math.floor(Math.random() * 10)}, ${Math.floor(Math.random() * 10)}, 1)`;
-                    setTimeout(() => {
-                        document.body.style.backgroundColor = '#000';
-                    }, 50);
-                }
-            }, 5000);
+            setTimeout(() => {
+                glitch.remove();
+            }, 300);
         }
+    }, 1000);
+}
         
         // Initialize background glitches
         createBackgroundGlitches();
@@ -908,5 +982,7 @@
         // Add beforeunload event to save view time
         window.addEventListener('beforeunload', saveViewTime);
     </script>
+
+
 </body>
 </html>
