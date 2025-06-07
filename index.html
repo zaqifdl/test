@@ -130,6 +130,7 @@
             margin-top: 20px;
             opacity: 0;
             transition: opacity 0.5s;
+            display: none; /* Initially hidden */
         }
         .glitch {
             position: fixed;
@@ -365,10 +366,7 @@
                                 glitchElement.innerHTML = '';
                                 progressContainer.style.display = 'none';
                                 countdownElement.style.display = 'block';
-                                motivationElement.style.opacity = '1';
                                 decryptText();
-                                showCountdown();
-                                showRandomQuote();
                             }, 1000);
                         }, 300);
                     }
@@ -405,6 +403,9 @@
                 if (iterations >= maxIterations) {
                     clearInterval(decryptInterval);
                     countdownContent.textContent = originalText;
+                    // Only show motivation after countdown is fully decrypted
+                    showCountdown();
+                    showRandomQuote();
                 }
             }, 50);
         }
@@ -442,8 +443,10 @@
         }
         
         function showRandomQuote() {
+            motivationElement.style.display = 'block'; // Make visible
             const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
             motivationElement.textContent = randomQuote;
+            motivationElement.style.opacity = '1';
             
             // Change quote every 5 seconds
             setInterval(() => {
