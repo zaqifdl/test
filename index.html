@@ -416,7 +416,7 @@
             overflow: hidden;
             background-color: #000 !important;
     z-index: 100; /* Higher than all background elements */
-    position: relative; /* Creates new stacking context */
+    position: relative; 
     border: 2px solid #33ff33;
     box-shadow: 0 0 15px #33ff33, 0 0 30px rgba(51, 255, 51, 0.3) !important;
         }
@@ -476,7 +476,7 @@
                 padding: 15px;
             }
         }
-        /* Add these new styles */
+       
 .grid-lines {
     position: fixed;
     top: 0;
@@ -814,8 +814,8 @@
                 const difference = targetDate - currentDate;
                 
                 if (difference <= 0) {
-                    elements.countdownContent.innerHTML = "BAC TIME HAS COME!<br><br>You're ready Mel1na!<br>Go make yourself proud!";
-                    elements.motivation.textContent = "MEL1NA: FINAL_EXAM_PROTOCOL ENGAGED";
+                    elements.countdownContent.innerHTML = "";
+                    elements.motivation.textContent = "";
                     elements.motivation.style.animation = "textGlow 2s infinite";
                     elements.countdown.classList.add('countdown-ending');
                     return;
@@ -1011,15 +1011,14 @@
     }, 5000);
 }
         
-        // Initialize background glitches
+        
         createBackgroundGlitches();
         
-        // Save last view time
+    
         function saveViewTime() {
             localStorage.setItem('lastBACView', new Date().toISOString());
         }
         
-        // Add beforeunload event to save view time
         window.addEventListener('beforeunload', saveViewTime);
         window.addEventListener('resize', () => {
     const rain = document.querySelector('.digital-rain');
